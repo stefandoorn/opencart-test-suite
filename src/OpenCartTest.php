@@ -269,10 +269,15 @@ class OpenCartTest extends PHPUnit_Framework_TestCase
         // $this->front->addPreAction(new Action('common/maintenance'));
     }
 
-    public function __construct($name = null, array $data = array(), $dataName = '')
+    public function __construct($initDirect = true, $name = null, array $data = array(), $dataName = '')
     {
         // Run parent constructor
         parent::__construct($name, $data, $dataName);
+
+        // Init
+        if($initDirect) {
+            $this->init();
+        }
     }
 
     public function customerLogin($user, $password, $override = false)
