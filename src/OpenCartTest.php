@@ -115,14 +115,28 @@ class OpenCartTest extends PHPUnit_Framework_TestCase
         // Load config
         $this->loadConfiguration();
 
-        // If VQMOD path, load it
+        // If VQMOD path, load it + Startup & Application Classes
         if($this->vqModPath) {
-            require_once($this->path . $this->vqModPath . 'vqmod.php');
-            VQMod::bootup();
-        }
+            $vqModPath = __DIR__ . $this->path . $this->vqModPath . 'vqmod.php';
+            if(file_exists($vqModPath)) {
+                require_once($vqModPath);
+                VQMod::bootup();
+            }
+            else {
+                throw new Exception('VQMod path doesnt exist: ' . $vqModPath);
+            }
 
-        // Startup & Application Classes
-        if(!$this->vqModPath) {
+            // VQMODDED Startup & Application Classes
+            require_once(VQMod::modCheck(DIR_SYSTEM . 'startup.php'));
+            require_once(VQMod::modCheck(DIR_SYSTEM . 'library/customer.php'));
+            require_once(VQMod::modCheck(DIR_SYSTEM . 'library/affiliate.php'));
+            require_once(VQMod::modCheck(DIR_SYSTEM . 'library/currency.php'));
+            require_once(VQMod::modCheck(DIR_SYSTEM . 'library/tax.php'));
+            require_once(VQMod::modCheck(DIR_SYSTEM . 'library/weight.php'));
+            require_once(VQMod::modCheck(DIR_SYSTEM . 'library/length.php'));
+            require_once(VQMod::modCheck(DIR_SYSTEM . 'library/cart.php'));
+        }
+        else {
             require_once(DIR_SYSTEM . 'startup.php');
             require_once(DIR_SYSTEM . 'library/customer.php');
             require_once(DIR_SYSTEM . 'library/affiliate.php');
@@ -131,21 +145,6 @@ class OpenCartTest extends PHPUnit_Framework_TestCase
             require_once(DIR_SYSTEM . 'library/weight.php');
             require_once(DIR_SYSTEM . 'library/length.php');
             require_once(DIR_SYSTEM . 'library/cart.php');
-        }
-        else
-        {
-            // VQMODDED Startup
-            require_once(VQMod::modCheck(DIR_SYSTEM . 'startup.php'));
-
-            // Application Classes
-            require_once(VQMod::modCheck(DIR_SYSTEM . 'library/customer.php'));
-            require_once(VQMod::modCheck(DIR_SYSTEM . 'library/affiliate.php'));
-            require_once(VQMod::modCheck(DIR_SYSTEM . 'library/currency.php'));
-            require_once(VQMod::modCheck(DIR_SYSTEM . 'library/tax.php'));
-            require_once(VQMod::modCheck(DIR_SYSTEM . 'library/weight.php'));
-            require_once(VQMod::modCheck(DIR_SYSTEM . 'library/length.php'));
-            require_once(VQMod::modCheck(DIR_SYSTEM . 'library/cart.php'));
-
         }
 
         // Registry
@@ -311,10 +310,14 @@ class OpenCartTest extends PHPUnit_Framework_TestCase
         // $this->front->addPreAction(new Action('common/maintenance'));
     }
 
-    public function __construct($name = null, array $data = array(), $dataName = '')
+    public function __construct($initDirect = true, $name = null, array $data = array(), $dataName = '')
     {
         // Run parent constructor
         parent::__construct($name, $data, $dataName);
+
+        if($initDirect) {
+            $this->init();
+        }
     }
 
     public function customerLogin($user, $password, $override = false)
