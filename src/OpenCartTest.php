@@ -74,18 +74,24 @@ class OpenCartTest extends PHPUnit_Framework_TestCase
         $path = $this->getConfigurationPath();
 
         // Configuration
-        if (file_exists($path)) {
-            require_once($path);
+        if (file_exists(__DIR__ . $path)) {
+            require_once(__DIR__ . $path);
         } else {
             throw new Exception('OpenCart has to be installed first!');
         }
     }
 
-    public function __construct($name = null, array $data = array(), $dataName = '')
+    public function init()
     {
-        $this->path = __DIR__ . '/../../../../../';
-        $this->env = 'catalog';
+        // Default path & env
+        if(is_null($this->path)) {
+            $this->setPath('/../../../../../');
+        }
+        if(is_null($this->env)) {
+            $this->setEnvironment('catalog');
+        }
 
+        // Load config
         $this->loadConfiguration();
 
         // Startup
@@ -261,12 +267,15 @@ class OpenCartTest extends PHPUnit_Framework_TestCase
         // $this->front->addPreAction(new Action('common/seo_url'));
         // Maintenance Mode
         // $this->front->addPreAction(new Action('common/maintenance'));
+    }
 
+    public function __construct($name = null, array $data = array(), $dataName = '')
+    {
         // Run parent constructor
         parent::__construct($name, $data, $dataName);
     }
 
-    protected function customerLogin($user, $password, $override = false)
+    public function customerLogin($user, $password, $override = false)
     {
         // set a REMOTE_ADDR for the customer ...
         $this->request->server['REMOTE_ADDR'] = '127.0.0.1';
@@ -277,7 +286,7 @@ class OpenCartTest extends PHPUnit_Framework_TestCase
         }
     }
 
-    protected function customerLogout()
+    public function customerLogout()
     {
         if ($this->customer->isLogged()) {
             $this->customer->logout();
@@ -286,7 +295,7 @@ class OpenCartTest extends PHPUnit_Framework_TestCase
 
     // legal hack to access a private property, this is only neccessary because
     // my pull request was rejected: https://github.com/opencart/opencart/pull/607
-    protected function getOutput()
+    public function getOutput()
     {
         $class = new ReflectionClass("Response");
         $property = $class->getProperty("output");
@@ -299,7 +308,7 @@ class OpenCartTest extends PHPUnit_Framework_TestCase
      *
      * @throws Exception if controller doesn't exist
      */
-    protected function loadControllerByRoute($route)
+    public function loadControllerByRoute($route)
     {
         $action = new Action($route);
 
@@ -316,7 +325,7 @@ class OpenCartTest extends PHPUnit_Framework_TestCase
 
     }
 
-    protected function dispatchAction($route)
+    public function dispatchAction($route)
     {
         // Router
         if (!empty($route)) {
@@ -331,7 +340,7 @@ class OpenCartTest extends PHPUnit_Framework_TestCase
         return $this->response;
     }
 
-    protected function loadModelByRoute($route)
+    public function loadModelByRoute($route)
     {
         $this->load->model($route);
         $parts = explode("/", $route);
